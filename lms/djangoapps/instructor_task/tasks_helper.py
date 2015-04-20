@@ -551,74 +551,76 @@ def upload_csv_to_report_store(rows, csv_name, course_id, timestamp):
     )
 
 
-def in_whitelist(user, course_id):
-    return CertificateWhitelist.objects.filter(user=user, course_id=course_id, whitelist=True).exists()
-
-
-def is_embargoed(user, course_id):
-    return UserProfile.objects.filter(user=user, allow_certificate=False).exists()
-
-
 def is_eligible_for_certificate(embargoed, whitelisted, grade):
-    if not embargoed:
-        if whitelisted or grade is not None:
-            return 'Y'
-
-    return 'N'
+    return not embargoed and (whitelisted or grade is not None)
 
 
 def is_certificate_delivered(embargoed, whitelisted, certificate_status):
-    if not embargoed:
-        if whitelisted:
-            return 'Y'
-        return 'Y' if certificate_status['status'] == CertificateStatuses.downloadable else 'N'
-
-    return 'N'
-
-
-def enrollment_track(user, course_id):
-    mode, is_active = CourseEnrollment.enrollment_mode_for_user(user, course_id)
-    return mode if mode else ''
+    return not embargoed and (whitelisted or certificate_status['status'] == CertificateStatuses.downloadable)
 
 
 def verification_status(user, course_id):
+    """
+    Returns the verification status.
+    """
     user_is_verified = SoftwareSecurePhotoVerification.user_is_verified(user)
-    user_is_reverified = SoftwareSecurePhotoVerification.user_is_reverified_for_all(course_id, user)
+    user_is_re_verified = SoftwareSecurePhotoVerification.user_is_reverified_for_all(course_id, user)
 
-    if not user_is_reverified:
+    if not user_is_re_verified:
         return 'ID Verification Expired'
 
-    if user_is_verified and user_is_reverified:
+    if user_is_verified and user_is_re_verified:
         return 'ID Verified'
     else:
         return 'Not ID Verified'
 
 
 def certificate_type(certificate_status):
+    """
+    Returns certificate mode if status is not 'unavailable'
+    """
     if certificate_status['status'] == CertificateStatuses.unavailable:
         return 'N/A'
-
     return certificate_status['mode']
 
 
-def certificate_columns_data(user, course_id, grade):
+def generate_certificates_data(user, course_id, grade):
+    """
+    Generates & return the data related to the certificates.
+    :param user: User object
+    :param course_id: ID of the course
+    :param grade: grade value
+    :return: Column list for certificate data.
+    """
 
-    whitelisted = in_whitelist(user, course_id)
-    embargoed = is_embargoed(user, course_id)
+    user_in_white_list = CertificateWhitelist.objects.filter(user=user, course_id=course_id, whitelist=True).exists()
+    user_in_embargoed_list = UserProfile.objects.filter(user=user, allow_certificate=False).exists()
 
-    eligible_for_certificate = is_eligible_for_certificate(embargoed, whitelisted, grade)
+    eligible_for_certificate = is_eligible_for_certificate(user_in_embargoed_list, user_in_white_list, grade)
+
     if eligible_for_certificate:
+        is_eligible = 'Y'
         certificate_status = certificate_status_for_student(user, course_id)
+        is_delivered = 'Y' if is_certificate_delivered(
+            user_in_embargoed_list,
+            user_in_white_list,
+            certificate_status
+        ) else 'N'
+        cert_type = certificate_type(certificate_status)
+    else:
+        is_eligible = 'N'
+        is_delivered = 'N'
+        cert_type = 'N/A'
 
-    # If user is not eligible for certificate then don't check `certificate delivery` and `certificate type`
+    # Respective data fields are listed below:
+    # ['Certificate Eligible', 'Certificate Delivered', 'Enrollment Track', 'Verification Status','Certificate Type']
     data = [
-        eligible_for_certificate,
-        'N' if not eligible_for_certificate else is_certificate_delivered(embargoed, whitelisted, certificate_status),
-        enrollment_track(user, course_id),
+        is_eligible,
+        is_delivered,
+        CourseEnrollment.enrollment_mode_for_user(user, course_id)[0],
         verification_status(user, course_id),
-        'N/A' if not eligible_for_certificate else certificate_type(certificate_status)
+        cert_type
     ]
-
     return data
 
 
@@ -725,7 +727,7 @@ def upload_grades_csv(_xmodule_instance_args, _entry_id, course_id, _task_input,
 
             # from nose.tools import set_trace; set_trace()
             # get data for certificate columns
-            cert_data = certificate_columns_data(student, course_id, gradeset['grade'])
+            cert_data = generate_certificates_data(student, course_id, gradeset['grade'])
 
             # Not everybody has the same gradable items. If the item is not
             # found in the user's gradeset, just assume it's a 0. The aggregated
