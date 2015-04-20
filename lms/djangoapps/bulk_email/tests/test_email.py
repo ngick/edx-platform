@@ -15,6 +15,7 @@ from django.test.utils import override_settings
 
 from bulk_email.models import Optout
 from courseware.tests.factories import StaffFactory, InstructorFactory
+from courseware.tests.helpers import LoginEnrollmentTestCase
 from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
 from instructor_task.subtasks import update_subtask_status
 from student.roles import CourseStaffRole
@@ -44,7 +45,7 @@ class MockCourseEmailResult(object):
         return mock_update_subtask_status
 
 
-class EmailSendFromDashboardTestCase(ModuleStoreTestCase):
+class EmailSendFromDashboardTestCase(ModuleStoreTestCase, LoginEnrollmentTestCase):
     """
     Test that emails send correctly.
     """
@@ -75,6 +76,7 @@ class EmailSendFromDashboardTestCase(ModuleStoreTestCase):
         self.url = reverse('instructor_dashboard', kwargs={'course_id': self.course.id.to_deprecated_string()})
         # Response loads the whole instructor dashboard, so no need to explicitly
         # navigate to a particular email section
+        self.grant_sudo_access(self.course.id.to_deprecated_string(), 'test')
         response = self.client.get(self.url)
         email_section = '<div class="vert-left send-email" id="section-send-email">'
         # If this fails, it is likely because ENABLE_INSTRUCTOR_EMAIL is set to False

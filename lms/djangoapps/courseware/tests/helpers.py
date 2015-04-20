@@ -141,9 +141,11 @@ class LoginEnrollmentTestCase(TestCase):
         self.assert_request_status_code(200, url, method="POST", data=request_data)
 
     def grant_sudo_access(self, region, password):
-
+        """
+        Grant sudo access to staff or instructor user.
+        """
         self.client.post(
-            '/sudo/?region={}'.format(str(region.replace('/', '_'))),
+            '/sudo/?region={}'.format(region.replace(':', '').replace('/', '_').replace('+', '_')),
             {'password': password},
             follow=True
         )

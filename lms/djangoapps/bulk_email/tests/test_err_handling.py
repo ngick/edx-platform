@@ -16,6 +16,7 @@ from smtplib import SMTPDataError, SMTPServerDisconnected, SMTPConnectError
 
 from bulk_email.models import CourseEmail, SEND_TO_ALL
 from bulk_email.tasks import perform_delegate_email_batches, send_course_email
+from courseware.tests.helpers import LoginEnrollmentTestCase
 from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
 from instructor_task.models import InstructorTask
 from instructor_task.subtasks import (
@@ -39,7 +40,7 @@ class EmailTestException(Exception):
 
 @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message'))
 @patch.dict(settings.FEATURES, {'ENABLE_INSTRUCTOR_EMAIL': True, 'REQUIRE_COURSE_EMAIL_AUTH': False})
-class TestEmailErrors(ModuleStoreTestCase):
+class TestEmailErrors(ModuleStoreTestCase, LoginEnrollmentTestCase):
     """
     Test that errors from sending email are handled properly.
     """
@@ -50,6 +51,7 @@ class TestEmailErrors(ModuleStoreTestCase):
         self.course = CourseFactory.create(display_name=course_title)
         self.instructor = AdminFactory.create()
         self.client.login(username=self.instructor.username, password="test")
+        self.grant_sudo_access(self.course.id.to_deprecated_string(), 'test')
 
         # load initial content (since we don't run migrations as part of tests):
         call_command("loaddata", "course_email_template.json")

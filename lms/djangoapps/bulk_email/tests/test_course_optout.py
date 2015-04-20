@@ -12,6 +12,7 @@ from django.conf import settings
 from django.test.utils import override_settings
 
 from xmodule.modulestore.tests.django_utils import TEST_DATA_MOCK_MODULESTORE
+from courseware.tests.helpers import LoginEnrollmentTestCase
 from student.tests.factories import UserFactory, AdminFactory, CourseEnrollmentFactory
 from student.models import CourseEnrollment
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
@@ -19,7 +20,7 @@ from xmodule.modulestore.tests.factories import CourseFactory
 
 
 @patch('bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message'))
-class TestOptoutCourseEmails(ModuleStoreTestCase):
+class TestOptoutCourseEmails(ModuleStoreTestCase, LoginEnrollmentTestCase):
 
     """
     Test that optouts are referenced in sending course email.
@@ -28,7 +29,7 @@ class TestOptoutCourseEmails(ModuleStoreTestCase):
     def setUp(self):
         super(TestOptoutCourseEmails, self).setUp()
         course_title = u"ẗëṡẗ title ｲ乇丂ｲ ﾶ乇丂丂ﾑg乇 ｷo尺 ﾑﾚﾚ тэѕт мэѕѕаБэ"
-        self.course = CourseFactory.create(display_name=course_title)
+        self.course = CourseFactory.create(display_name=course_title, run='T12015')
         self.instructor = AdminFactory.create()
         self.student = UserFactory.create()
         CourseEnrollmentFactory.create(user=self.student, course_id=self.course.id)
@@ -54,6 +55,7 @@ class TestOptoutCourseEmails(ModuleStoreTestCase):
         """Navigate to the instructor dash's email view"""
         # Pull up email view on instructor dashboard
         url = reverse('instructor_dashboard', kwargs={'course_id': self.course.id.to_deprecated_string()})
+        self.grant_sudo_access(self.course.id.to_deprecated_string(), 'test')
         response = self.client.get(url)
         email_section = '<div class="vert-left send-email" id="section-send-email">'
         # If this fails, it is likely because ENABLE_INSTRUCTOR_EMAIL is set to False

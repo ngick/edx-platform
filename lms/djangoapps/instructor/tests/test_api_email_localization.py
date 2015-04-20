@@ -7,6 +7,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 
 from courseware.tests.factories import InstructorFactory
+from courseware.tests.helpers import LoginEnrollmentTestCase
 from lang_pref import LANGUAGE_KEY
 from student.models import CourseEnrollment
 from student.tests.factories import UserFactory
@@ -15,7 +16,7 @@ from xmodule.modulestore.tests.factories import CourseFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 
-class TestInstructorAPIEnrollmentEmailLocalization(ModuleStoreTestCase):
+class TestInstructorAPIEnrollmentEmailLocalization(ModuleStoreTestCase, LoginEnrollmentTestCase):
     """
     Test whether the enroll, unenroll and beta role emails are sent in the
     proper language, i.e: the student's language.
@@ -31,6 +32,7 @@ class TestInstructorAPIEnrollmentEmailLocalization(ModuleStoreTestCase):
         self.instructor = InstructorFactory(course_key=self.course.id)
         UserPreference.set_preference(self.instructor, LANGUAGE_KEY, 'zh-cn')
         self.client.login(username=self.instructor.username, password='test')
+        self.grant_sudo_access(self.course.id.to_deprecated_string(), 'test')
 
         self.student = UserFactory.create()
         UserPreference.set_preference(self.student, LANGUAGE_KEY, 'fr')
