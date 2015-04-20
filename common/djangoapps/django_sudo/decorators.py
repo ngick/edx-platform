@@ -34,6 +34,9 @@ def sudo_required(func_or_region):
                 course_specific_region = kwargs.get('library_key_string')
             if course_specific_region:
                 course_specific_region = course_specific_region.replace(':', '').replace('/', '_').replace('+', '_')
+
+            course_specific_region = course_specific_region.encode('utf-8', 'ignore')
+
             # N.B. region is captured from the enclosing sudo_required function
             if not request.is_sudo(region=region or course_specific_region):
                 return redirect_to_sudo(request.get_full_path(), region=region or course_specific_region)
