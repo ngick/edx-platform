@@ -2215,4 +2215,4 @@ ECOMMERCE_API_SIGNING_KEY = None
 ECOMMERCE_API_TIMEOUT = 5
 
 # Reverification checkpoint name pattern
-CHECKPOINT_PATTERN = r'(?P<checkpoint_name>[a-zA-Z0-9_ ]+)'
+CHECKPOINT_PATTERN = r'(?P<checkpoint_name>[\w ]+)'
