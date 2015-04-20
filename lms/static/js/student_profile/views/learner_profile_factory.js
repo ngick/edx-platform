@@ -63,6 +63,7 @@
 
             var usernameFieldView = new FieldsView.ReadonlyFieldView({
                     model: accountSettingsModel,
+                    screenReaderTitle: gettext('Username'),
                     valueAttribute: "username",
                     helpMessage: ""
             });
