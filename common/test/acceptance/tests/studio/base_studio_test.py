@@ -8,6 +8,7 @@ from ...fixtures.library import LibraryFixture
 from ..helpers import UniqueCourseTest
 from ...pages.studio.overview import CourseOutlinePage
 from ...pages.studio.utils import verify_ordering
+from ...pages.common.sudo_page import SudoPage
 
 
 class StudioCourseTest(UniqueCourseTest):
@@ -148,3 +149,8 @@ class StudioLibraryTest(WebAppTest):
             password=user.get('password')
         )
         auth_page.visit()
+
+    def get_sudo_access(self, redirect_page, password):
+        sudo_password_page = SudoPage(self.browser, redirect_page)
+        sudo_password_page.visit()
+        sudo_password_page.submit_sudo_password_and_get_access(password)
