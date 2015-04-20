@@ -29,7 +29,7 @@ git+https://github.com/mitocw/django-cas.git@60a5b8e5a62e63e0d5d224a87f0b489201a
 -e git+https://github.com/edx/bok-choy.git@82d2f4b72e807b10d112179c0a4abd810a001b82#egg=bok_choy
 -e git+https://github.com/edx-solutions/django-splash.git@7579d052afcf474ece1239153cffe1c89935bc4f#egg=django-splash
 -e git+https://github.com/edx/acid-block.git@e46f9cda8a03e121a00c7e347084d142d22ebfb7#egg=acid-xblock
--e git+https://github.com/edx/edx-ora2.git@release-2015-04-07T13.05#egg=edx-ora2
+-e git+https://github.com/edx/edx-ora2.git@release-2015-04-15T15.17#egg=edx-ora2
 -e git+https://github.com/edx/edx-submissions.git@8fb070d2a3087dd7656d27022e550d12e3b85ba3#egg=edx-submissions
 -e git+https://github.com/edx/opaque-keys.git@1254ed4d615a428591850656f39f26509b86d30a#egg=opaque-keys
 -e git+https://github.com/edx/ease.git@97de68448e5495385ba043d3091f570a699d5b5f#egg=ease
@@ -38,10 +38,11 @@ git+https://github.com/mitocw/django-cas.git@60a5b8e5a62e63e0d5d224a87f0b489201a
 -e git+https://github.com/edx/edx-val.git@d6087908aa3dd05ceaa7f56a21284f86c53cb3f0#egg=edx-val
 -e git+https://github.com/pmitros/RecommenderXBlock.git@9b07e807c89ba5761827d0387177f71aa57ef056#egg=recommender-xblock
 -e git+https://github.com/edx/edx-milestones.git@547f2250ee49e73ce8d7ff4e78ecf1b049892510#egg=edx-milestones
--e git+https://github.com/edx/edx-search.git@5eb3853fe74c8fdd9d82d36b8ab0058309390f86#egg=edx-search
+-e git+https://github.com/edx/edx-search.git@6ce8b25a2539370de32dc7cb643ae27c9b8f798d#egg=edx-search
 git+https://github.com/edx/edx-lint.git@8bf82a32ecb8598c415413df66f5232ab8d974e9#egg=edx_lint==0.2.1
 -e git+https://github.com/edx/xblock-utils.git@581ed636c862b286002bb9a3724cc883570eb54c#egg=xblock-utils
 -e git+https://github.com/edx-solutions/xblock-google-drive.git@138e6fa0bf3a2013e904a085b9fed77dab7f3f21#egg=xblock-google-drive
+-e git+https://github.com/edx/edx-reverification-block.git@1b7902db20bcefe7bd0109f866f830deaaf8d7f7#egg=edx-reverification-block
 
 # Third Party XBlocks
 -e git+https://github.com/mitodl/edx-sga@172a90fd2738f8142c10478356b2d9ed3e55334a#egg=edx-sga

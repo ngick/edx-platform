@@ -343,6 +343,8 @@ if settings.COURSEWARE_ENABLED:
         # For the instructor
         url(r'^courses/{}/instructor$'.format(settings.COURSE_ID_PATTERN),
             'instructor.views.instructor_dashboard.instructor_dashboard_2', name="instructor_dashboard"),
+
+
         url(r'^courses/{}/set_course_mode_price$'.format(settings.COURSE_ID_PATTERN),
             'instructor.views.instructor_dashboard.set_course_mode_price', name="set_course_mode_price"),
         url(r'^courses/{}/instructor/api/'.format(settings.COURSE_ID_PATTERN),
@@ -597,14 +599,19 @@ if settings.FEATURES.get('AUTOMATIC_AUTH_FOR_TESTING'):
 if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH'):
     urlpatterns += (
         url(r'', include('third_party_auth.urls')),
+        # NOTE: The following login_oauth_token endpoint is DEPRECATED.
+        # Please use the exchange_access_token endpoint instead.
+        url(r'^login_oauth_token/(?P<backend>[^/]+)/$', 'student.views.login_oauth_token'),
+    )
+
+# OAuth token exchange
+if settings.FEATURES.get('ENABLE_THIRD_PARTY_AUTH') and settings.FEATURES.get('ENABLE_OAUTH2_PROVIDER'):
+    urlpatterns += (
         url(
             r'^oauth2/exchange_access_token/(?P<backend>[^/]+)/$',
             oauth_exchange.views.AccessTokenExchangeView.as_view(),
             name="exchange_access_token"
         ),
-        # NOTE: The following login_oauth_token endpoint is DEPRECATED.
-        # Please use the exchange_access_token endpoint instead.
-        url(r'^login_oauth_token/(?P<backend>[^/]+)/$', 'student.views.login_oauth_token'),
     )
 
 # Certificates Web/HTML View
@@ -617,6 +624,14 @@ if settings.FEATURES.get('CERTIFICATES_HTML_VIEW', False):
 urlpatterns += (
     url(r'^xdomain_proxy.html$', 'cors_csrf.views.xdomain_proxy', name='xdomain_proxy'),
 )
+
+# Custom courses on edX (CCX) URLs
+if settings.FEATURES["CUSTOM_COURSES_EDX"]:
+    urlpatterns += (
+        url(r'^courses/{}/'.format(settings.COURSE_ID_PATTERN),
+            include('ccx.urls')),
+    )
+
 
 urlpatterns = patterns(*urlpatterns)
 

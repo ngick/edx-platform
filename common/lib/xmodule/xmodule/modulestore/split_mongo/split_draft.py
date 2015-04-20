@@ -5,7 +5,6 @@ Module for the dual-branch fall-back Draft->Published Versioning ModuleStore
 from xmodule.modulestore.split_mongo.split import SplitMongoModuleStore, EXCLUDE_ALL
 from xmodule.exceptions import InvalidVersionError
 from xmodule.modulestore import ModuleStoreEnum
-from xmodule.modulestore.courseware_index import CoursewareSearchIndexer
 from xmodule.modulestore.exceptions import InsufficientSpecificationError, ItemNotFoundError
 from xmodule.modulestore.draft_and_published import (
     ModuleStoreDraftAndPublished, DIRECT_ONLY_CATEGORIES, UnsupportedRevisionError
@@ -217,10 +216,6 @@ class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPubli
                 if branch == ModuleStoreEnum.BranchName.draft and branched_location.block_type in DIRECT_ONLY_CATEGORIES:
                     self.publish(parent_loc.version_agnostic(), user_id, blacklist=EXCLUDE_ALL, **kwargs)
 
-        # Remove this location from the courseware search index so that searches
-        # will refrain from showing it as a result
-        CoursewareSearchIndexer.add_to_search_index(self, location, delete=True)
-
     def _map_revision_to_branch(self, key, revision=None):
         """
         Maps RevisionOptions to BranchNames, inserting them into the key
@@ -366,9 +361,6 @@ class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPubli
 
         self._flag_publish_event(location.course_key)
 
-        # Now it's been published, add the object to the courseware search index so that it appears in search results
-        CoursewareSearchIndexer.do_publish_index(self, location)
-
         return self.get_item(location.for_branch(ModuleStoreEnum.BranchName.published), **kwargs)
 
     def unpublish(self, location, user_id, **kwargs):
@@ -508,10 +500,6 @@ class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPubli
                 draft_course = course_key.for_branch(ModuleStoreEnum.BranchName.draft)
                 with self.branch_setting(ModuleStoreEnum.Branch.draft_preferred, draft_course):
                     draft_block = self.import_xblock(user_id, draft_course, block_type, block_id, fields, runtime)
-                    # if block was published once and now it is in draft state then return draft version
-                    # as current state of block is draft state
-                    if self.has_published_version(draft_block) and block_type not in DIRECT_ONLY_CATEGORIES:
-                        return draft_block
                     return self.publish(draft_block.location.version_agnostic(), user_id, blacklist=EXCLUDE_ALL, **kwargs)
 
             # do the import

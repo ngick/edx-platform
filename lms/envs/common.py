@@ -208,7 +208,14 @@ FEATURES = {
     'ENABLE_INSTRUCTOR_BACKGROUND_TASKS': True,
 
     # Enable instructor to assign individual due dates
+    # Note: In order for this feature to work, you must also add
+    # 'courseware.student_field_overrides.IndividualStudentOverrideProvider' to
+    # the setting FIELD_OVERRIDE_PROVIDERS, in addition to setting this flag to
+    # True.
     'INDIVIDUAL_DUE_DATES': False,
+
+    # Enable Custom Courses for EdX
+    'CUSTOM_COURSES_EDX': False,
 
     # Enable legacy instructor dashboard
     'ENABLE_INSTRUCTOR_LEGACY_DASHBOARD': True,
@@ -308,7 +315,7 @@ FEATURES = {
     # When a user goes to the homepage ('/') the user see the
     # courses listed in the announcement dates order - this is default Open edX behavior.
     # Set to True to change the course sorting behavior by their start dates, latest first.
-    'ENABLE_COURSE_SORTING_BY_START_DATE': False,
+    'ENABLE_COURSE_SORTING_BY_START_DATE': True,
 
     # Flag to enable new user account APIs.
     'ENABLE_USER_REST_API': False,
@@ -367,6 +374,8 @@ FEATURES = {
 
     # Social Media Sharing on Student Dashboard
     'DASHBOARD_SHARE_SETTINGS': {
+        # Note: Ensure 'CUSTOM_COURSE_URLS' has a matching value in cms/envs/common.py
+        'CUSTOM_COURSE_URLS': False,
         'FACEBOOK_SHARING': False,
         'TWITTER_SHARING': False,
         'TWITTER_SHARING_TEXT': None
@@ -1196,6 +1205,9 @@ reverify_js = [
     'js/verify_student/incourse_reverify.js',
 ]
 
+ccx_js = sorted(rooted_glob(PROJECT_ROOT / 'static', 'js/ccx/**/*.js'))
+
+
 PIPELINE_CSS = {
     'style-vendor': {
         'source_filenames': [
@@ -1389,6 +1401,10 @@ PIPELINE_JS = {
     'reverify': {
         'source_filenames': reverify_js,
         'output_filename': 'js/reverify.js'
+    },
+    'ccx': {
+        'source_filenames': ccx_js,
+        'output_filename': 'js/ccx.js'
     }
 }
 
@@ -2084,6 +2100,7 @@ ALL_LANGUAGES = (
 ### Apps only installed in some instances
 OPTIONAL_APPS = (
     'mentoring',
+    'problem_builder',
     'edx_sga',
 
     # edx-ora2
@@ -2215,4 +2232,5 @@ ECOMMERCE_API_SIGNING_KEY = None
 ECOMMERCE_API_TIMEOUT = 5
 
 # Reverification checkpoint name pattern
-CHECKPOINT_PATTERN = r'(?P<checkpoint_name>[\w ]+)'
+CHECKPOINT_PATTERN = r'(?P<checkpoint_name>\w+)'
+FIELD_OVERRIDE_PROVIDERS = ()
